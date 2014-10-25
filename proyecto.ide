@@ -1,0 +1,17 @@
+{
+    "autores":[
+        [
+            "Flavio Danesse", 
+            "fdanesse@gmail.com"
+        ]
+    ], 
+    "categoria":"", 
+    "descripcion":"", 
+    "licencia":"GPL3", 
+    "main":"Control.py", 
+    "mimetypes":"", 
+    "nombre":"ControlLab", 
+    "path":"/home/flavio/BatovideWorkSpace/ControlLab", 
+    "url":"", 
+    "version":"0.0.1"
+}
