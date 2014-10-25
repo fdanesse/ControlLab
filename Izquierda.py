@@ -31,11 +31,11 @@ class Izquierda(Gtk.EventBox):
         todas = WidgetPC("Todas")
         todas.connect("activar", self.__activar_todas)
         self.base_box.pack_start(todas, False, False, 0)
-        todas.modify_bg(0, Gdk.color_parse("#0000ff"))
 
         for addr in range(8, 9):
             widget = WidgetPC("192.168.1.%s" % addr)
             widget.connect("activar", self.__activar)
+            self.base_box.pack_start(widget, False, False, 0)
 
         #for addr in range(10, 25):
         #    widget = WidgetPC("192.168.5.%s" % addr)

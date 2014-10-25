@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=ControlLabServer
+Comment=ControlLabServer
+Exec=ControlLabServer
+Terminal=false
+Type=Application
+NoDisplay=false
