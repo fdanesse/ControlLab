@@ -7,7 +7,10 @@ import commands
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GObject
+from gi.repository import GdkPixbuf
 from gi.repository import GLib
+
+from JAMediaTerminal.Terminal import Terminal
 
 base = os.path.dirname(__file__)
 
@@ -33,6 +36,8 @@ class WidgetPC(Gtk.EventBox):
         self.ip = ip
         self.client = False
         self.connected = False
+        self.videostream = False
+        self.terminal = Terminal()
 
         frame = Gtk.Frame()
         frame.set_label(self.ip)
@@ -43,7 +48,8 @@ class WidgetPC(Gtk.EventBox):
         event.add(hbox)
         frame.add(event)
 
-        drawing = Gtk.DrawingArea()
+        drawing = Gtk.DrawingArea()  #gst-launch-0.10 udpsrc port=5001 ! smokedec ! ffmpegcolorspace ! autovideosink
+        drawing.connect("realize", self.__realize)
         drawing.modify_bg(0, Gdk.color_parse("#000000"))
         drawing.set_size_request(200, -1)
         hbox.pack_start(drawing, False, False, 5)
@@ -65,11 +71,22 @@ class WidgetPC(Gtk.EventBox):
         self.vbox.pack_start(guiar, False, False, 0)
         guiar.set_sensitive(False)
 
+        hbox2 = Gtk.HBox()
         volumen = ControlVolumen()
-        self.vbox.pack_start(volumen, False, False, 0)
         volumen.set_sensitive(False)
+        terminal = Gtk.ToggleButton()
+        image = Gtk.Image()
+        archivo = os.path.join(base, "JAMediaTerminal/Iconos/bash.svg")
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(archivo, 16, 16)
+        image.set_from_pixbuf(pixbuf)
+        terminal.set_image(image)
+        terminal.connect("toggled", self.__show_terminal)
+        hbox2.pack_start(volumen, True, True, 0)
+        hbox2.pack_start(terminal, True, True, 0)
+        self.vbox.pack_start(hbox2, False, False, 0)
 
         hbox.pack_start(self.vbox, False, False, 0)
+        hbox.pack_start(self.terminal, True, True, 5)
 
         # Widgets para status
         vbox = Gtk.VBox()
@@ -87,6 +104,14 @@ class WidgetPC(Gtk.EventBox):
         if self.ip != "Todas":
             self.set_sensitive(False)
             GLib.timeout_add(3000, self.__check_on)
+
+    def __realize(self, drawing):
+        self.terminal.hide()
+        #if self.ip != "Todas":
+        #    from gi.repository import GdkX11
+        #    from VideoStream import VideoStream
+        #    xid = drawing.get_property('window').get_xid()
+        #    self.videostream = VideoStream(xid)
 
     def __check_on(self):
         ret = commands.getoutput("nmap -sP %s" % self.ip)
@@ -160,6 +185,12 @@ class WidgetPC(Gtk.EventBox):
 
     def __do_toggled(self, widget):
         self.emit("activar", self.ip, widget.get_label(), widget.get_active())
+
+    def __show_terminal(self, widget):
+        if widget.get_active():
+            self.terminal.show()
+        else:
+            self.terminal.hide()
 
     def set_valor(self, aplicacion, valor):
         """
