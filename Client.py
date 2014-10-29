@@ -11,7 +11,9 @@ class Client(GObject.Object):
 
     __gsignals__ = {
     "error": (GObject.SIGNAL_RUN_FIRST,
-        GObject.TYPE_NONE, (GObject.TYPE_INT,))}
+        GObject.TYPE_NONE, (GObject.TYPE_INT,)),
+    "connected": (GObject.SIGNAL_RUN_FIRST,
+        GObject.TYPE_NONE, (GObject.TYPE_BOOLEAN,))}
 
     def __init__(self, ip):
 
@@ -27,13 +29,13 @@ class Client(GObject.Object):
             self.socket.connect(self.dir)
             self.socket.setblocking(0)
             time.sleep(0.5)
-            return True
+            self.emit("connected", True)
         except socket.error, err:
             # FIXME: socket.error:
             # [Errno 111] Conexión rehusada
             # [Errno 113] No existe ninguna ruta hasta el «host»
             self.emit("error", err.errno)
-            return False
+            self.emit("connected", False)
 
     def desconectarse(self):
         self.socket.close()
