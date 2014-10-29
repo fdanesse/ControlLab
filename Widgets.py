@@ -20,6 +20,30 @@ APLICACIONES = {
     }
 
 
+class ConnectControl(GObject.Object):
+
+    #__gsignals__ = {
+    #"update": (GObject.SIGNAL_RUN_LAST,
+    #    GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, )),
+    #"end": (GObject.SIGNAL_RUN_LAST,
+    #    GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT, ))}
+
+    def __init__(self, ip):
+
+        GObject.Object.__init__(self)
+
+        self.ip = ip
+
+    def __check_on(self):
+        ret = commands.getoutput("nmap -sP %s" % self.ip)
+        if "Host is up" in ret:
+            self.connected = True
+        else:
+            self.connected = False
+        GLib.timeout_add(3000, self.__check_on)
+        return False
+
+
 class WidgetPC(Gtk.EventBox):
 
     __gsignals__ = {
@@ -103,7 +127,7 @@ class WidgetPC(Gtk.EventBox):
 
         if self.ip != "Todas":
             self.set_sensitive(False)
-            GLib.timeout_add(3000, self.__check_on)
+            #GLib.timeout_add(5000, self.__check_on)
 
     def __realize(self, drawing):
         self.terminal.hide()
@@ -113,21 +137,21 @@ class WidgetPC(Gtk.EventBox):
         #    xid = drawing.get_property('window').get_xid()
         #    self.videostream = VideoStream(xid)
 
-    def __check_on(self):
-        ret = commands.getoutput("nmap -sP %s" % self.ip)
-        if "Host is up" in ret:
-            self.connected = True
-            self.info.set_text("Terminal en Linea")
-            self.info.modify_fg(0, Gdk.color_parse("#00ff00"))
-            if not self.client:
-                self.__connect_client()
-        else:
-            self.connected = False
-            self.info.set_text("Terminal Fuera de Linea")
-            self.info.modify_fg(0, Gdk.color_parse("#ff0000"))
-            self.__desconectarse()
-        GLib.timeout_add(3000, self.__check_on)
-        return False
+    #def __check_on(self):
+    #    ret = commands.getoutput("nmap -sP %s" % self.ip)
+    #    if "Host is up" in ret:
+    #        self.connected = True
+    #        self.info.set_text("Terminal en Linea")
+    #        self.info.modify_fg(0, Gdk.color_parse("#00ff00"))
+    #        if not self.client:
+    #            self.__connect_client()
+    #    else:
+    #        self.connected = False
+    #        self.info.set_text("Terminal Fuera de Linea")
+    #        self.info.modify_fg(0, Gdk.color_parse("#ff0000"))
+    #        self.__desconectarse()
+    #    GLib.timeout_add(15000, self.__check_on)
+    #    return False
 
     def __desconectarse(self):
         if self.client:
@@ -146,11 +170,11 @@ class WidgetPC(Gtk.EventBox):
         from Client import Client
         self.client = Client(self.ip)
         conectado = self.client.conectarse()
-        self.set_sensitive(conectado)
         if conectado:
             self.info1.set_text("Cliente Conectado")
             self.info1.modify_fg(0, Gdk.color_parse("#00ff00"))
             self.client.connect("error", self.__client_error)
+            self.set_sensitive(True)
         else:
             self.__desconectarse()
         return False
