@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import commands
 import threading
 
 from gi.repository import Gtk
@@ -21,28 +20,6 @@ APLICACIONES = {
     }
 
 
-class ConnectControl(GObject.Object):
-
-    __gsignals__ = {
-    "connected": (GObject.SIGNAL_RUN_LAST,
-        GObject.TYPE_NONE, (GObject.TYPE_BOOLEAN, ))}
-
-    def __init__(self, ip):
-
-        GObject.Object.__init__(self)
-
-        self.ip = ip
-
-    def check_on(self):
-        ret = commands.getoutput("nmap -sP %s" % self.ip)
-        if "Host is up" in ret:
-            self.emit("connected", True)
-        else:
-            self.emit("connected", False)
-        GLib.timeout_add(5000, self.check_on)
-        return False
-
-
 class WidgetPC(Gtk.EventBox):
 
     __gsignals__ = {
@@ -58,11 +35,8 @@ class WidgetPC(Gtk.EventBox):
 
         self.ip = ip
         self.client = False
-        #self.connected = False
-        self.videostream = False
+        #self.videostream = False
         self.terminal = Terminal()
-        self.control = False
-        self.thread = False
 
         frame = Gtk.Frame()
         frame.set_label(self.ip)
@@ -128,11 +102,6 @@ class WidgetPC(Gtk.EventBox):
 
         if self.ip != "Todas":
             self.set_sensitive(False)
-            self.control = ConnectControl(self.ip)
-            self.control.connect("connected", self.__control_update)
-            self.thread = threading.Thread(
-                target=self.control.check_on)
-            self.thread.start()
 
     def __realize(self, drawing):
         self.terminal.hide()
@@ -142,21 +111,7 @@ class WidgetPC(Gtk.EventBox):
         #    xid = drawing.get_property('window').get_xid()
         #    self.videostream = VideoStream(xid)
 
-    def __control_update(self, control, connected):
-        """
-        El widget se activa o desactiva segun esté o no
-        conectado a su terminal.
-        """
-        if connected:
-            self.info.set_text("Terminal en Linea")
-            self.info.modify_fg(0, Gdk.color_parse("#00ff00"))
-            self.__connect_client()
-        else:
-            self.info.set_text("Terminal Fuera de Linea")
-            self.info.modify_fg(0, Gdk.color_parse("#ff0000"))
-            self.__desconectarse()
-
-    def __desconectarse(self):
+    def desconectarse(self):
         if self.client:
             self.client.desconectarse()
         del(self.client)
@@ -165,14 +120,15 @@ class WidgetPC(Gtk.EventBox):
         self.info1.modify_fg(0, Gdk.color_parse("#ff0000"))
         self.set_sensitive(False)
 
-    def __connect_client(self):
+    def connect_client(self):
         if not self.client:
             from Client import Client
             self.client = Client(self.ip)
             self.client.connect("error", self.__client_error)
             self.client.connect("connected", self.__client_connected)
-            th = threading.Thread(target=self.client.conectarse)
-            th.start()
+            #th = threading.Thread(target=self.client.conectarse)
+            #th.start()
+            self.client.conectarse()
 
     def __client_connected(self, client, connected):
         if connected:
@@ -180,20 +136,21 @@ class WidgetPC(Gtk.EventBox):
             self.info1.modify_fg(0, Gdk.color_parse("#00ff00"))
             self.set_sensitive(True)
         else:
-            self.__desconectarse()
+            self.desconectarse()
 
     def __client_error(self, client, error):
         if error == 113:
             self.info1.set_text("[Errno 113] No existe ninguna ruta hasta el «host»")
         elif error == 111:
-            self.info.set_text("[Errno 111] Conexión rehusada")
+            self.info1.set_text("[Errno 111] Conexión rehusada")
         elif error == 107:
             self.info1.set_text("[Errno 107] El otro extremo de la conexión no está conectado")
         elif error == 11:
             self.info1.set_text("[Errno 11] Recurso no disponible temporalmente")
         elif error == 32:
             self.info1.set_text("[Errno 32] Tubería rota")
-        self.__desconectarse()
+        self.info1.modify_fg(0, Gdk.color_parse("#ff0000"))
+        self.desconectarse()
 
     def __do_toggled(self, widget):
         self.emit("activar", self.ip, widget.get_label(), widget.get_active())

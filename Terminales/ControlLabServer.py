@@ -32,7 +32,6 @@ class RequestHandler(SocketServer.StreamRequestHandler):
 
     def __procesar(self, entrada, ip):
         datos = entrada.split(",")
-        print "Recibido:", datos
         if datos:
             if datos[0] == "Down":
                 text = ""

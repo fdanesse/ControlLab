@@ -6,6 +6,8 @@ import time
 
 from gi.repository import GObject
 
+#15 19 24
+
 
 class Client(GObject.Object):
 
