@@ -1,2 +1,2 @@
 #!/bin/sh
-exec "/usr/bin/python" "/usr/local/share/ControlLabServer.py" "$@"
+exec "/usr/bin/python" "/usr/local/share/ControlLab/ControlLabServer.py" "$@"

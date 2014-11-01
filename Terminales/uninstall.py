@@ -6,8 +6,8 @@ import commands
 
 desktop = os.path.join('/etc/xdg/autostart/', 'ControlLabServer.desktop')
 run = os.path.join('/usr/bin/', 'ControlLabServer')
-server = os.path.join('/usr/local/share/', 'ControlLabServer.py')
+path = os.path.join('/usr/local/share/ControlLab')
 
 print commands.getoutput('rm %s' % (desktop))
 print commands.getoutput('rm %s' % (run))
-print commands.getoutput('rm %s' % (server))
+print commands.getoutput('rm -r %s' % (path))
