@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import time
 import socket
 import SocketServer
 import commands
+import json
+import codecs
+
+CONFIG = os.path.join(os.environ["HOME"], ".ControlLabServer.json")
 
 
 class RequestHandler(SocketServer.StreamRequestHandler):
@@ -37,10 +42,14 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 commands.getoutput('sudo shutdown -h now')
                 return "OK"
             elif datos[0] == "Down":
-                text = ""
                 for dat in datos[1:]:
-                    text = "%s\n%s" % (text,
-                        commands.getoutput("killall %s" % dat))
+                    #commands.getoutput("killall %s" % dat)
+                    self.server.bloquear(dat)
+                return "OK"
+            elif datos[0] == "Up":
+                for dat in datos[1:]:
+                    #commands.getoutput("killall %s" % dat)
+                    self.server.desbloquear(dat)
                 return "OK"
             else:
                 return "OK"
@@ -58,9 +67,53 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         self.socket.setblocking(0)
         print "Server ON . . ."
 
+    def bloquear(self, dat):
+        _dict = get_dict()
+        _dict[dat] = True
+        set_dict(_dict)
+
+    def desbloquear(self, dat):
+        _dict = get_dict()
+        del(_dict[dat])
+        set_dict(_dict)
+
     def shutdown(self):
         print "Server OFF"
         SocketServer.ThreadingTCPServer.shutdown(self)
+
+
+def make_config_file():
+    _dict = {}
+    archivo = open(CONFIG, "w")
+
+    archivo.write(
+        json.dumps(
+            _dict,
+            indent=4,
+            separators=(", ", ":"),
+            sort_keys=True
+            )
+        )
+
+    archivo.close()
+
+
+def get_dict():
+    archivo = codecs.open(CONFIG, "r", "utf-8")
+    _dict = json.JSONDecoder(encoding="utf-8").decode(archivo.read())
+    archivo.close()
+    return _dict
+
+
+def set_dict(_dict):
+    archivo = open(CONFIG, "w")
+    archivo.write(
+        json.dumps(
+            _dict,
+            indent=4,
+            separators=(", ", ":"),
+            sort_keys=True))
+    archivo.close()
 
 
 def __return_ip(interfaz):
@@ -97,6 +150,7 @@ def get_ip():
 
 
 if __name__ == "__main__":
+    make_config_file()
     ip = get_ip()
     while not ip:
         time.sleep(2)

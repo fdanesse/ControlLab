@@ -189,6 +189,18 @@ class WidgetPC(Gtk.EventBox):
                 self.client.enviar(text)
             #print self.client.recibir()
 
+    def desbloquear(self, aplicacion):
+        """
+        Le dice a la terminal que bloquee determinadas aplicaciones.
+        """
+        if self.client:
+            items = list(APLICACIONES[aplicacion])
+            text = "Up"
+            for item in items:
+                text = "%s,%s" % (text, item)
+            self.client.enviar(text)
+            #print self.client.recibir()
+
 
 class ControlVolumen(Gtk.VolumeButton):
 

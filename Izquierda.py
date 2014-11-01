@@ -119,14 +119,13 @@ class Izquierda(Gtk.EventBox):
             self.handlers[key] = GLib.timeout_add(5000,
                 self.__down, widget, aplicacion)
         else:
-            #self.handlers[key] = GLib.timeout_add(5000,
-            #    self.__up, widget, aplicacion)
-            pass
+            self.handlers[key] = GLib.timeout_add(5000,
+                self.__up, widget, aplicacion)
 
     def __down(self, widget, aplicacion):
         widget.bloquear(aplicacion)
         return True
 
-    #def __up(self, widget, aplicacion):
-    #    #widget.bloquear(aplicacion)
-    #    return True
+    def __up(self, widget, aplicacion):
+        widget.desbloquear(aplicacion)
+        return True
