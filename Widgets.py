@@ -89,7 +89,14 @@ class WidgetPC(Gtk.EventBox):
         self.vbox.pack_start(hbox2, False, False, 0)
 
         hbox.pack_start(self.vbox, False, False, 0)
-        hbox.pack_start(self.terminal, True, True, 5)
+
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(
+            Gtk.PolicyType.AUTOMATIC,
+            Gtk.PolicyType.AUTOMATIC)
+        #scroll.add_with_viewport(self.base_box)
+        scroll.add(self.terminal)
+        hbox.pack_start(scroll, True, True, 5)
 
         # Widgets para status
         vbox = Gtk.VBox()
