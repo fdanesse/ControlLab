@@ -62,13 +62,17 @@ class WidgetPC(Gtk.EventBox):
         boton.connect("toggled", self.__do_toggled)
         self.vbox.pack_start(boton, False, False, 0)
 
-        control = Gtk.ToggleButton("Controlar")
-        self.vbox.pack_start(control, False, False, 0)
-        control.set_sensitive(False)
+        boton = Gtk.ToggleButton("Controlar")
+        boton.connect("toggled", self.__do_toggled)
+        self.vbox.pack_start(boton, False, False, 0)
 
-        guiar = Gtk.ToggleButton("Guiar")
-        self.vbox.pack_start(guiar, False, False, 0)
-        guiar.set_sensitive(False)
+        boton = Gtk.ToggleButton("Guiar")
+        boton.connect("toggled", self.__do_toggled)
+        self.vbox.pack_start(boton, False, False, 0)
+
+        boton = Gtk.ToggleButton("Apagar")
+        boton.connect("toggled", self.__do_toggled)
+        self.vbox.pack_start(boton, False, False, 0)
 
         hbox2 = Gtk.HBox()
         volumen = ControlVolumen()
@@ -175,11 +179,15 @@ class WidgetPC(Gtk.EventBox):
         Le dice a la terminal que bloquee determinadas aplicaciones.
         """
         if self.client:
-            items = list(APLICACIONES[aplicacion])
-            text = "Down"
-            for item in items:
-                text = "%s,%s" % (text, item)
-            self.client.enviar(text)
+            if aplicacion == "Apagar":
+                self.client.enviar("Apagar,")
+            else:
+                items = list(APLICACIONES[aplicacion])
+                text = "Down"
+                for item in items:
+                    text = "%s,%s" % (text, item)
+                self.client.enviar(text)
+            #print self.client.recibir()
 
 
 class ControlVolumen(Gtk.VolumeButton):

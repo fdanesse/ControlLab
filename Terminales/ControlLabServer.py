@@ -33,12 +33,15 @@ class RequestHandler(SocketServer.StreamRequestHandler):
     def __procesar(self, entrada, ip):
         datos = entrada.split(",")
         if datos:
-            if datos[0] == "Down":
+            if datos[0] == "Apagar":
+                commands.getoutput('sudo shutdown -h now')
+                return "OK"
+            elif datos[0] == "Down":
                 text = ""
                 for dat in datos[1:]:
                     text = "%s\n%s" % (text,
                         commands.getoutput("killall %s" % dat))
-                return text
+                return "OK"
             else:
                 return "OK"
         else:

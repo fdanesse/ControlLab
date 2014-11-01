@@ -104,17 +104,10 @@ class Izquierda(Gtk.EventBox):
                 break
 
     def __activar_todas(self, widget, ip, aplicacion, valor):
-        """
-        Cualquier cambio en el Widget General debe afectar a cada uno de los
-        Widgets particulares.
-        """
         for widget in self.base_box.get_children()[1:]:
             widget.set_valor(aplicacion, valor)
 
     def __activar(self, widget, ip, aplicacion, valor):
-        """
-        Activa y desactiva Handlers.
-        """
         self.__new_handler(widget, ip, aplicacion, valor)
 
     def __new_handler(self, widget, ip, aplicacion, valor):
@@ -128,11 +121,12 @@ class Izquierda(Gtk.EventBox):
         else:
             #self.handlers[key] = GLib.timeout_add(5000,
             #    self.__up, widget, aplicacion)
-            print "Se vuelve a permitir:", aplicacion, "en:", ip
+            pass
 
     def __down(self, widget, aplicacion):
-        """
-        Manda desactivar aplicaciones en las terminales.
-        """
         widget.bloquear(aplicacion)
         return True
+
+    #def __up(self, widget, aplicacion):
+    #    #widget.bloquear(aplicacion)
+    #    return True

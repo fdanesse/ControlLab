@@ -25,3 +25,6 @@ print commands.getoutput('chown root:root %s' % (server))
 print commands.getoutput('chmod 755 %s' % (desktop))
 print commands.getoutput('chmod 755 %s' % (run))
 print commands.getoutput('chmod 755 %s' % (server))
+
+#sudo su
+print commands.getoutput('echo "docente ALL=NOPASSWD:/sbin/shutdown" >> /etc/sudoers')
