@@ -15,6 +15,11 @@ class BasePanel(Gtk.Paned):
 
         self.modify_bg(0, Gdk.color_parse("#ffffff"))
 
-        self.pack1(Izquierda(), resize=False, shrink=False)
+        self.izquierda = Izquierda()
+
+        self.pack1(self.izquierda, resize=False, shrink=False)
 
         self.show_all()
+
+    def salir(self):
+        self.izquierda.salir()

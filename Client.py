@@ -6,7 +6,7 @@ import time
 
 from gi.repository import GObject
 
-#15 19 24
+#15 18 19 23 24
 
 
 class Client(GObject.Object):
@@ -51,8 +51,6 @@ class Client(GObject.Object):
                 self.socket.sendall(datos)
                 enviado = True
             except socket.error, err:
-                # FIXME: socket.error
-                # [Errno 32] Tubería rota
                 self.emit("error", err.errno)
                 return False
             time.sleep(0.02)
@@ -64,10 +62,11 @@ class Client(GObject.Object):
                 entrada = self.socket.recv(200)
                 entrada = entrada.replace("*", "").strip()
             except socket.error, err:
-                print "Error Recibir:", err
-                # FIXME: socket.error
-                # [Errno 107] El otro extremo de la conexión no está conectado
-                # [Errno 11] Recurso no disponible temporalmente
-                self.emit("error", err.errno)
-                return False
+                if err.errno == 11:
+                    # "[Errno 11] Recurso no disponible temporalmente"
+                    pass
+                else:
+                    self.emit("error", err.errno)
+                    return False
+        time.sleep(0.02)
         return entrada

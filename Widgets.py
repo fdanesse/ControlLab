@@ -32,20 +32,21 @@ class WidgetPC(Gtk.EventBox):
         Gtk.EventBox.__init__(self)
 
         self.modify_bg(0, Gdk.color_parse("#ffffff"))
+        self.set_border_width(5)
 
         self.ip = ip
         self.client = False
         #self.videostream = False
         self.terminal = Terminal()
 
-        frame = Gtk.Frame()
-        frame.set_label(self.ip)
+        self.frame = Gtk.Frame()
+        self.frame.set_label(self.ip)
         event = Gtk.EventBox()
         event.modify_bg(0, Gdk.color_parse("#ffffff"))
         event.set_border_width(5)
         hbox = Gtk.HBox()
         event.add(hbox)
-        frame.add(event)
+        self.frame.add(event)
 
         drawing = Gtk.DrawingArea()  #gst-launch-0.10 udpsrc port=5001 ! smokedec ! ffmpegcolorspace ! autovideosink
         drawing.connect("realize", self.__realize)
@@ -63,10 +64,12 @@ class WidgetPC(Gtk.EventBox):
         self.vbox.pack_start(boton, False, False, 0)
 
         boton = Gtk.ToggleButton("Controlar")
+        boton.set_sensitive(False)
         boton.connect("toggled", self.__do_toggled)
         self.vbox.pack_start(boton, False, False, 0)
 
         boton = Gtk.ToggleButton("Guiar")
+        boton.set_sensitive(False)
         boton.connect("toggled", self.__do_toggled)
         self.vbox.pack_start(boton, False, False, 0)
 
@@ -78,6 +81,7 @@ class WidgetPC(Gtk.EventBox):
         volumen = ControlVolumen()
         volumen.set_sensitive(False)
         terminal = Gtk.ToggleButton()
+        terminal.set_active(True)
         image = Gtk.Image()
         archivo = os.path.join(base, "JAMediaTerminal/Iconos/bash.svg")
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(archivo, 16, 16)
@@ -94,7 +98,6 @@ class WidgetPC(Gtk.EventBox):
         scroll.set_policy(
             Gtk.PolicyType.AUTOMATIC,
             Gtk.PolicyType.AUTOMATIC)
-        #scroll.add_with_viewport(self.base_box)
         scroll.add(self.terminal)
         hbox.pack_start(scroll, True, True, 5)
 
@@ -108,19 +111,36 @@ class WidgetPC(Gtk.EventBox):
         vbox.pack_start(self.info1, False, False, 5)
         hbox.pack_start(vbox, False, False, 5)
 
-        self.add(frame)
+        self.add(self.frame)
         self.show_all()
 
         if self.ip != "Todas":
             self.set_sensitive(False)
 
     def __realize(self, drawing):
-        self.terminal.hide()
+        #self.terminal.hide()
         #if self.ip != "Todas":
         #    from gi.repository import GdkX11
         #    from VideoStream import VideoStream
         #    xid = drawing.get_property('window').get_xid()
         #    self.videostream = VideoStream(xid)
+        pass
+
+    def set_color_active(self, connected):
+        if connected:
+            self.info.set_text("Terminal en Linea")
+            self.info.modify_fg(0, Gdk.color_parse("#00ff00"))
+            self.modify_bg(0, Gdk.color_parse("#ffffff"))
+            self.frame.modify_bg(0, Gdk.color_parse("#ffffff"))
+            self.frame.get_child().modify_bg(0, Gdk.color_parse("#ffffff"))
+            self.connect_client()
+        else:
+            self.info.set_text("Terminal Fuera de Linea")
+            self.info.modify_fg(0, Gdk.color_parse("#ff0000"))
+            self.modify_bg(0, Gdk.color_parse("#b3b3b3"))
+            self.frame.modify_bg(0, Gdk.color_parse("#b3b3b3"))
+            self.frame.get_child().modify_bg(0, Gdk.color_parse("#b3b3b3"))
+            self.desconectarse()
 
     def desconectarse(self):
         if self.client:
@@ -156,10 +176,12 @@ class WidgetPC(Gtk.EventBox):
             self.info1.set_text("[Errno 111] Conexión rehusada")
         elif error == 107:
             self.info1.set_text("[Errno 107] El otro extremo de la conexión no está conectado")
-        elif error == 11:
-            self.info1.set_text("[Errno 11] Recurso no disponible temporalmente")
         elif error == 32:
             self.info1.set_text("[Errno 32] Tubería rota")
+        elif error == 9:
+            self.info1.set_text("[Errno 9] Bad file descriptor")
+        else:
+            self.info1.set_text("Error Desconocido: %s" % error)
         self.info1.modify_fg(0, Gdk.color_parse("#ff0000"))
         self.desconectarse()
 
@@ -168,9 +190,9 @@ class WidgetPC(Gtk.EventBox):
 
     def __show_terminal(self, widget):
         if widget.get_active():
-            self.terminal.show()
+            self.terminal.get_parent().show()
         else:
-            self.terminal.hide()
+            self.terminal.get_parent().hide()
 
     def set_valor(self, aplicacion, valor):
         """
@@ -194,19 +216,24 @@ class WidgetPC(Gtk.EventBox):
                 for item in items:
                     text = "%s,%s" % (text, item)
                 self.client.enviar(text)
-            #print self.client.recibir()
+            self.client.recibir()
 
     def desbloquear(self, aplicacion):
         """
         Le dice a la terminal que bloquee determinadas aplicaciones.
         """
         if self.client:
-            items = list(APLICACIONES[aplicacion])
-            text = "Up"
-            for item in items:
-                text = "%s,%s" % (text, item)
-            self.client.enviar(text)
-            #print self.client.recibir()
+            if aplicacion != "Apagar":
+                items = list(APLICACIONES[aplicacion])
+                text = "Up"
+                for item in items:
+                    text = "%s,%s" % (text, item)
+                self.client.enviar(text)
+                self.client.recibir()
+
+    def salir(self):
+        for key in APLICACIONES.keys():
+            self.desbloquear(key)
 
 
 class ControlVolumen(Gtk.VolumeButton):

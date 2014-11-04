@@ -32,7 +32,16 @@ print commands.getoutput('chmod 755 %s' % (run))
 print commands.getoutput('chmod 755 %s' % (server))
 
 #sudo su
-print commands.getoutput('echo "docente ALL=NOPASSWD:/sbin/shutdown" >> /etc/sudoers')
+user = raw_input("Ingresa el usuario a controlar: ")
+comand = "%s ALL=NOPASSWD:/sbin/shutdown" % user
+arch = open('/etc/sudoers', 'r')
+text = arch.read()
+arch.close()
+if not comand in text:
+    text = '%s\n%s\n' % (text, comand)
+    arch = open('/etc/sudoers', 'w')
+    text = arch.write(text)
+    arch.close()
 
 # CONTROL
 desktop = os.path.join(PATH, 'ControlLab.desktop')

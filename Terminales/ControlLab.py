@@ -31,9 +31,13 @@ class ControlLab(GObject.GObject):
 
     def __handle(self):
         _dict = get_dict()
-        for key in _dict.keys():
-            commands.getoutput("killall %s" % key)
-        return True
+        map(self.__bloquear, _dict.keys())
+        GLib.timeout_add(5000, self.__handle)
+        return False
+
+    def __bloquear(self, aplicacion):
+        print aplicacion
+        commands.getoutput("killall %s" % aplicacion)
 
 
 if __name__ == "__main__":

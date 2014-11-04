@@ -13,7 +13,7 @@ from Widgets import WidgetPC
 
 DICT = {
     "base": "192.168.1",
-    "rango": range(8, 9),
+    "rango": range(10, 11),
     }
 
 
@@ -93,14 +93,7 @@ class Izquierda(Gtk.EventBox):
         """
         for widget in self.base_box.get_children()[1:]:
             if widget.ip == ip:
-                if connected:
-                    widget.info.set_text("Terminal en Linea")
-                    widget.info.modify_fg(0, Gdk.color_parse("#00ff00"))
-                    widget.connect_client()
-                else:
-                    widget.info.set_text("Terminal Fuera de Linea")
-                    widget.info.modify_fg(0, Gdk.color_parse("#ff0000"))
-                    widget.desconectarse()
+                widget.set_color_active(connected)
                 break
 
     def __activar_todas(self, widget, ip, aplicacion, valor):
@@ -129,3 +122,7 @@ class Izquierda(Gtk.EventBox):
     def __up(self, widget, aplicacion):
         widget.desbloquear(aplicacion)
         return True
+
+    def salir(self):
+        for widget in self.base_box.get_children()[1:]:
+            widget.salir()

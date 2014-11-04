@@ -43,12 +43,10 @@ class RequestHandler(SocketServer.StreamRequestHandler):
                 return "OK"
             elif datos[0] == "Down":
                 for dat in datos[1:]:
-                    #commands.getoutput("killall %s" % dat)
                     self.server.bloquear(dat)
                 return "OK"
             elif datos[0] == "Up":
                 for dat in datos[1:]:
-                    #commands.getoutput("killall %s" % dat)
                     self.server.desbloquear(dat)
                 return "OK"
             else:
@@ -71,11 +69,13 @@ class Server(SocketServer.ThreadingMixIn, SocketServer.ThreadingTCPServer):
         _dict = get_dict()
         _dict[dat] = True
         set_dict(_dict)
+        commands.getoutput("killall %s" % dat)
 
     def desbloquear(self, dat):
         _dict = get_dict()
-        del(_dict[dat])
-        set_dict(_dict)
+        if _dict.get(dat, False):
+            del(_dict[dat])
+            set_dict(_dict)
 
     def shutdown(self):
         print "Server OFF"

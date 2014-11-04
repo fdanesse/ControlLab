@@ -40,6 +40,7 @@ class Control(Gtk.Window):
         self.connect("delete-event", self.__salir)
 
     def __salir(self, widget=None, event=None):
+        self.panel.salir()
         Gtk.main_quit()
         sys.exit(0)
 
