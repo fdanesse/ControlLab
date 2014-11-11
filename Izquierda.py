@@ -12,8 +12,8 @@ from gi.repository import GLib
 from Widgets import WidgetPC
 
 DICT = {
-    "base": "192.168.1",
-    "rango": range(10, 11),
+    "base": "192.168.5",
+    "rango": [11, 12, 13, 14, 16, 17, 18, 20, 21, 22, 23],
     }
 
 
